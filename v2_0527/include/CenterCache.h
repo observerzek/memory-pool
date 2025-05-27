@@ -8,8 +8,8 @@ namespace MemoryPool
 
 class CenterCache{
 private:
-    std::array<std::atomic<void*>, FREE_LIST_SIZE> center_list_;
-    std::array<size_t, FREE_LIST_SIZE> center_list_nums_;
+    std::array<std::atomic<Span*>, FREE_LIST_SIZE> center_list_;
+    // std::array<size_t, FREE_LIST_SIZE> center_list_nums_;
     std::array<std::atomic_flag, FREE_LIST_SIZE> center_list_lock_;
 
 public:
@@ -28,11 +28,10 @@ public:
 
     void* allocate(size_t bytes, size_t nums);
 
-    void deallocate(void* ptr, size_t bytes);
+    void deallocate(void* memory_list, size_t bytes);
 
 private:
     CenterCache(){
-        center_list_nums_.fill(0);
         for(auto &i : center_list_){
             i.store(nullptr, std::memory_order_relaxed);
         }
@@ -41,7 +40,7 @@ private:
         }
     }
 
-    void* getMemoryFromPage(size_t bytes);
+    Span* getMemoryFromPage(size_t bytes);
     
     // 0526
     // 要实现这个函数好像挺难的

@@ -27,7 +27,6 @@ void* ThreadPool::allocate(size_t bytes){
 }
 
 
-
 void* ThreadPool::getMemoryFromCenter(size_t bytes){
     size_t index = SizeClass::getIndex(bytes);
     size_t nums_block;
@@ -42,7 +41,8 @@ void* ThreadPool::getMemoryFromCenter(size_t bytes){
     else nums_block = 1;
 
     void* memory = CenterCache::getInstance().allocate(bytes, nums_block);
-    setListNums(index);
+    free_list_nums_[index] = nums_block;
+    // setListNums(index);
     return memory;
 }
 

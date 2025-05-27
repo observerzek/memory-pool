@@ -44,8 +44,9 @@ public:
 // is_use表示是否被分配到CenterCache里
 // 每个Span在分配到CenterCache时
 // 会根据bytes大小，分割成多个自由链表block
-// block_list 则是记录该链表头
+// block_list 则是记录该空闲链表头
 // block_allocated表示分配出去的block数量
+// block_non_allocated表示未被分配出去的block数量
 
 struct Span{
     Span* pre = nullptr;
@@ -55,6 +56,7 @@ struct Span{
     bool is_use = false;
     void* block_list = nullptr;
     size_t block_allocated = 0;
+    size_t block_non_allocated = 0;
 };
 
 
