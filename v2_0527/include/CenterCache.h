@@ -9,7 +9,6 @@ namespace MemoryPool
 class CenterCache{
 private:
     std::array<std::atomic<Span*>, FREE_LIST_SIZE> center_list_;
-    // std::array<size_t, FREE_LIST_SIZE> center_list_nums_;
     std::array<std::atomic_flag, FREE_LIST_SIZE> center_list_lock_;
 
 public:
