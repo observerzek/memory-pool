@@ -8,8 +8,7 @@ namespace MemoryPool
 
 class CenterCache{
 private:
-    std::array<std::atomic<void*>, FREE_LIST_SIZE> center_list_;
-    std::array<size_t, FREE_LIST_SIZE> center_list_nums_;
+    std::array<std::atomic<Span*>, FREE_LIST_SIZE> center_list_;
     std::array<std::atomic_flag, FREE_LIST_SIZE> center_list_lock_;
 
 public:
@@ -32,7 +31,6 @@ public:
 
 private:
     CenterCache(){
-        center_list_nums_.fill(0);
         for(auto &i : center_list_){
             i.store(nullptr, std::memory_order_relaxed);
         }

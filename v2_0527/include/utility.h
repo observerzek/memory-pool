@@ -55,6 +55,7 @@ struct Span{
     bool is_use = false;
     void* block_list = nullptr;
     size_t block_allocated = 0;
+    size_t block_non_allocated = 0;
 };
 
 
