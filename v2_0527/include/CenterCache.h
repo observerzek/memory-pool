@@ -49,9 +49,9 @@ private:
     // 意味着要归还的空间也是连续的
     // 要找出连续的 4096 B 个连续的空间单位
     // 好像比较难
-    void  returnMemoryToPage(void* ptr, size_t bytes);
+    void  returnMemoryToPage(Span* span, size_t bytes);
 
-    bool  shouldReturn(size_t bytes);
+    inline bool shouldReturn(Span* (&span));
 };
 
 

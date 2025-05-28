@@ -18,18 +18,19 @@ constexpr size_t PAGE_SIZE = 4096;
 
 constexpr size_t PAGE_NUMS = 64;
 
+constexpr size_t MAX_PAGE_NUMS = MAX_BYTES / PAGE_SIZE;
 
 class SizeClass{
 public:
 
-    static size_t byteAlignment(size_t bytes){
+    inline static size_t byteAlignment(size_t bytes){
         return (getIndex(bytes) + 1) * ALIGNMENT;
     }
 
-    // 0~8 byte -> 0
+    // 1~8 byte -> 0
     // 9~16 byte -> 1
     // 17~24 byte -> 2
-    static size_t getIndex(size_t bytes){
+    inline static size_t getIndex(size_t bytes){
         return (bytes + ALIGNMENT - 1) / ALIGNMENT - 1;
     }
 
@@ -55,6 +56,7 @@ struct Span{
     size_t page_nums = 0;
     bool is_use = false;
     void* block_list = nullptr;
+    size_t block_nums = 0;
     size_t block_allocated = 0;
     size_t block_non_allocated = 0;
 };
@@ -66,6 +68,10 @@ inline void* getNextBlock(void* current){
 
 inline void breakBlockConnect(void* current){
     *reinterpret_cast<void**>(current) = nullptr;
+}
+
+inline void setBlockNextPointer(void* (&ptr), void* target){
+    *reinterpret_cast<void**>(ptr) = target;
 }
 
 

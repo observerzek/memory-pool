@@ -11,16 +11,19 @@ constexpr size_t PAGE_SIZE = 4096;
 
 class PageCache{
 private:
-    struct PageNode{
-        std::shared_ptr<PageNode> next;
-        size_t page_nums;
-        void* page_add;
-    };
+    // struct PageNode{
+    //     std::shared_ptr<PageNode> next;
+    //     size_t page_nums;
+    //     void* page_add;
+    // };
 
-    using NodePtr = std::shared_ptr<PageNode>;
+    // using NodePtr = std::shared_ptr<PageNode>;
 
-    std::map<size_t, NodePtr> page_pool_;
-    std::map<void*, NodePtr> address_to_node_;
+    // 页面数量 到 span 的映射
+    // 1 <= size_t <= 64 (256 * 1024 / 4096)
+    std::map<size_t, Span*> page_pool_;
+    // 根据页地址 到 该页对应的 span结点 的映射
+    std::map<void*, Span*> address_to_span_;
     std::mutex mutex_;
 
 public:
@@ -31,13 +34,25 @@ public:
         return page_cache;
     }
 
-    void* allocate(size_t page_nums);  
-    void  deallocate(void* prt, size_t bytes);
+    Span* allocate(size_t page_nums);  
+    void  deallocate(Span* span, size_t bytes);
+
+    Span* getPageSpan(void* page_add){
+        return address_to_span_[page_add];
+    }
 
 private:
     PageCache() = default;
 
-    void* getMemoryFromSys(size_t bytes);
+    void getMemoryFromSys();
+
+    void spiltSpan(size_t main_page,size_t sub_page);
+
+    void mergeSpan(Span* span);
+
+    void pushSpanToPageList(Span* span, size_t page);
+
+    Span* popSpanFromPageList(size_t page);
 
 };
 
