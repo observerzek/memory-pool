@@ -70,7 +70,7 @@ inline void breakBlockConnect(void* current){
     *reinterpret_cast<void**>(current) = nullptr;
 }
 
-inline void setBlockNextPointer(void* (&ptr), void* target){
+inline void setBlockNextPointer(void* ptr, void* target){
     *reinterpret_cast<void**>(ptr) = target;
 }
 

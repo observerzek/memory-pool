@@ -129,12 +129,12 @@ Span* PageCache::popSpanFromPageList(size_t page){
 
 
 void PageCache::getMemoryFromSys(){
-    void* page = mmap(nullptr, MAX_PAGE_NUMS, 
+    void* page = mmap(nullptr, MAX_PAGE_NUMS * PAGE_SIZE, 
                       PROT_READ | PROT_WRITE,
                       MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     Span* new_span = new Span();
     new_span->page_add = page;
-
+    new_span->page_nums = MAX_PAGE_NUMS;
     pushSpanToPageList(new_span, MAX_PAGE_NUMS);
 }
 

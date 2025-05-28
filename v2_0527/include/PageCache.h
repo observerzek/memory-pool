@@ -7,7 +7,6 @@
 namespace MemoryPool
 {
 
-constexpr size_t PAGE_SIZE = 4096;
 
 class PageCache{
 private:

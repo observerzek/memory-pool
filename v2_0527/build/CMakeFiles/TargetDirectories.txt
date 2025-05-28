@@ -1,0 +1,3 @@
+/home/zek/cpp_files/zekMemoryPool/v2_0527/build/CMakeFiles/mainTest.dir
+/home/zek/cpp_files/zekMemoryPool/v2_0527/build/CMakeFiles/edit_cache.dir
+/home/zek/cpp_files/zekMemoryPool/v2_0527/build/CMakeFiles/rebuild_cache.dir

@@ -98,13 +98,17 @@ Span* CenterCache::getMemoryFromPage(size_t bytes){
     void* current_block = new_span->page_add;
     void* current_block_next = reinterpret_cast<char*>(current_block) + bytes;
 
+    int count = 0;
     while(current_block_next < page_add_end){
         block_nums++;
+        std::cout << ++count << std::endl;
         setBlockNextPointer(current_block, current_block_next);
+        current_block = current_block_next;
         current_block_next = reinterpret_cast<char*>(current_block) + bytes;
         // current_block_next = getNextBlock(current_block);
     }
     setBlockNextPointer(current_block, nullptr);
+    block_nums++;
 
     new_span->block_non_allocated = block_nums;
     new_span->block_nums = block_nums;
@@ -113,8 +117,10 @@ Span* CenterCache::getMemoryFromPage(size_t bytes){
     new_span->is_use = true;
     new_span->next = list_head;
     new_span->pre = nullptr;
-
-    list_head->pre = new_span;
+    
+    if(list_head){
+        list_head->pre = new_span;
+    }
     center_list_[index].store(new_span, std::memory_order_relaxed);
 
     return new_span;

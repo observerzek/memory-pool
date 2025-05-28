@@ -98,9 +98,9 @@ void ThreadPool::returnMemoryToCenter(size_t bytes){
     free_list_nums_[index] = count + 1;
 }
 
-ThreadPool::~ThreadPool(){
-    std::cout << "end" << std::endl;
-}
+// ThreadPool::~ThreadPool(){
+//     std::cout << "end" << std::endl;
+// }
 
 
 } // namespace MemoryPool
