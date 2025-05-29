@@ -1,4 +1,4 @@
 cd build
 make
 cd ..
-./mainTest
+./mainTest | tee -a testLog.txt

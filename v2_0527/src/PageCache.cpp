@@ -34,7 +34,7 @@ void PageCache::deallocate(Span* span, size_t bytes){
     log_deallocate_.begin();
     span->is_use = false;
     mergeSpan(span);
-    // 合并玩span后，获取的到页面数量才是真实的
+    // 合并完span后，获取的到页面数量才是真实的
     size_t page_num = span->page_nums;
     pushSpanToPageList(span, page_num);
     log_deallocate_.end();
@@ -73,19 +73,25 @@ void PageCache::mergeSpan(Span* span){
 
         // 这个span_merged下的
         // 所有页对应的span都要修改
+        // 25.05.29
+        // 实际上不用加下面这段
+        // 因为我在merge后
+        // 会执行push操作
+        // push操作会把所有页面指向当前span
+        // 因此这里就不用操作了
         // address_to_span_.erase(pre_page);
-        for(size_t i = 0; i < span_merged->page_nums; ++i){
-            void* span_merged_page = reinterpret_cast<char*>(span_merged->page_add) + i * PAGE_SIZE;
-            address_to_span_[span_merged_page] = span;           
-        }
+        // for(size_t i = 0; i < span_merged->page_nums; ++i){
+        //     void* span_merged_page = reinterpret_cast<char*>(span_merged->page_add) + i * PAGE_SIZE;
+        //     address_to_span_[span_merged_page] = span;           
+        // }
 
         span->page_nums = new_page_nums;
         span->page_add = span_merged->page_add;
+
         // 25.05.29
         // 这个span_merged 可能在 page_pool的某个队列里
         // 直接delete会出事的
         // 要找到它对应的队列，并弹出去
-
         popSpanFromPageList(span_merged, span_merged->page_nums);
         // 
         delete span_merged;
@@ -107,10 +113,10 @@ void PageCache::mergeSpan(Span* span){
         }
 
         // address_to_span_.erase(pos_page);
-        for(size_t i = 0; i < span_merged->page_nums; ++i){
-            void* span_merged_page = reinterpret_cast<char*>(span_merged->page_add) + i * PAGE_SIZE;
-            address_to_span_[span_merged_page] = span;           
-        }
+        // for(size_t i = 0; i < span_merged->page_nums; ++i){
+        //     void* span_merged_page = reinterpret_cast<char*>(span_merged->page_add) + i * PAGE_SIZE;
+        //     address_to_span_[span_merged_page] = span;           
+        // }
 
         span->page_nums = new_page_nums;
 
@@ -175,6 +181,9 @@ void PageCache::popSpanFromPageList(Span* span, size_t page){
     }
     Span* pre = span->pre;
     Span* next = span->next;
+
+    // 因为没做指针判断
+    // 导致出现segment default
     if(pre){
         pre->next = next;
     }

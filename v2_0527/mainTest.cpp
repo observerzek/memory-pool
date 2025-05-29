@@ -6,6 +6,7 @@
 #include <thread>
 #include <vector>
 #include <mutex>
+#include <ctime>
 
 
 using std::cout;
@@ -43,8 +44,6 @@ void warmMemoryPool(){
         }
     }
     MemoryPool::ThreadPool::getInstance()->~ThreadPool();
-    MemoryPool::CenterCache::getInstance().showDurationTime();
-    MemoryPool::PageCache::getInstance().showDurationTime();
     now.count();
 }
 
@@ -53,11 +52,14 @@ void test(){
     std::random_device rd;
     std::mt19937 gen(rd());
     std::mutex muxte;
+    std::atomic_flag atomic;
 
 
     size_t TEST_TIMES = 2e5;
 
     auto function = [&](const std::string & name, bool use_pool){
+        std::lock_guard<std::mutex> lock(muxte);
+
         if(use_pool){
             MemoryPool::CenterCache::getInstance().resetDurationTime();
             MemoryPool::PageCache::getInstance().resetDurationTime();
@@ -69,7 +71,7 @@ void test(){
             size_t bytes = ((rand() % 1500) + 1) * MemoryPool::ALIGNMENT;
             void* ptr = use_pool ? MemoryPool::allocate(bytes) : new char[bytes]();
             log.push_back(std::pair<void*, size_t>(ptr, bytes));
-            if((gen() % 100) < 90){
+            if((gen() % 100) < 80){
                 if(log.size() >= 1){
                     auto it = log.back();
                     if(use_pool){
@@ -91,32 +93,42 @@ void test(){
                 delete [] static_cast<char*>(it.first);
             }
         }
-        std::lock_guard<std::mutex> lock(muxte);
-        
+
         if(use_pool){
             MemoryPool::ThreadPool::getInstance()->~ThreadPool();
-            MemoryPool::CenterCache::getInstance().showDurationTime();
-            MemoryPool::PageCache::getInstance().showDurationTime();
         }
+        else{
+            // std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+
+
+        // std::lock_guard<std::mutex> lock(muxte);
         now.count();
+        // if(use_pool){
+        //     MemoryPool::CenterCache::getInstance().showDurationTime();
+        //     MemoryPool::PageCache::getInstance().showDurationTime();
+        // }
     };
 
     std::thread thread_1(function, "1", true);
-    // std::thread thread_2(function, "2", true);
-    // std::thread thread_3(function, "3", true);
-    // std::thread thread_4(function, "4", true);
+    std::thread thread_2(function, "2", true);
 
     std::thread thread_5(function, "5", false);
-    // std::thread thread_6(function, "6", false);
-    // std::thread thread_7(function, "7", false);
-    // std::thread thread_8(function, "8", false);
+    std::thread thread_6(function, "6", false);
 
     thread_1.join();
-    // thread_2.join();
-    // thread_3.join();
-    // thread_4.join();
+    thread_2.join();
     thread_5.join();
-    // thread_6.join();
+    thread_6.join();
+
+
+    cout << "----------------------" << endl;
+    for(int i = 0; i < 5; i++){
+        std::thread thread_t(function, std::to_string(i), i % 2 == 0);
+        std::thread thread_t_2(function, std::to_string(i), i % 2 == 0);
+        thread_t.join();
+        thread_t_2.join();
+    }
     // thread_7.join();
     // thread_8.join();
 }
@@ -142,9 +154,18 @@ void originalTest(){
 
 
 int main(){
+    std::chrono::time_point<std::chrono::high_resolution_clock> now;
+    now = std::chrono::high_resolution_clock::now();
+    std::time_t real_time = std::chrono::system_clock::to_time_t(now);
+    cout << std::ctime(&real_time);
+    cout << "--------------------------" << endl;
+
+
     std::thread warm(warmMemoryPool);
     warm.join();
     test();
     // originalTest();
+    cout << "end" << endl;
+    cout << "--------------------------" << endl << endl;
     return 0;
 }

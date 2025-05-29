@@ -1,5 +1,6 @@
 #include "../include/ThreadCache.h"
 #include "../include/CenterCache.h"
+#include "../include/PageCache.h"
 #include <cstdlib>
 
 
@@ -109,8 +110,11 @@ void ThreadPool::returnAllMemoryTocenter(void* memory_list, size_t bytes){
 
 ThreadPool::~ThreadPool() {
     for(size_t i = 0; i < FREE_LIST_SIZE; ++i){
-        // std::cout << "end 1 " << std::endl;
         void* block = free_list_[i];
+        // 因为忘记把该指针至空
+        // 导致如果两次析构
+        // 则会进入死循环
+        free_list_[i] = nullptr;
         if(block){
             returnAllMemoryTocenter(block, (i + 1) * ALIGNMENT);
         }

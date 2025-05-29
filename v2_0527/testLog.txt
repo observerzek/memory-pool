@@ -1,0 +1,47 @@
+Thu May 29 18:55:34 2025
+--------------------------
+warm process experiment : 1658.97ms
+1 experiment : 393.904ms
+5 experiment : 526.07ms
+2 experiment : 271.264ms
+6 experiment : 510.22ms
+----------------------
+0 experiment : 227.977ms
+0 experiment : 186.75ms
+1 experiment : 548.114ms
+1 experiment : 522.265ms
+2 experiment : 156.301ms
+2 experiment : 148.405ms
+3 experiment : 540.463ms
+3 experiment : 545.149ms
+4 experiment : 147.163ms
+4 experiment : 147.232ms
+end
+--------------------------
+
+Thu May 29 18:55:46 2025
+--------------------------
+warm process experiment : 1765.25ms
+1 experiment : 433.262ms
+6 experiment : 575.441ms
+5 experiment : 792.47ms
+2 experiment : 279.763ms
+----------------------
+0 experiment : 226.947ms
+0 experiment : 193.977ms
+1 experiment : 532.36ms
+1 experiment : 529.735ms
+2 experiment : 175.539ms
+2 experiment : 187.009ms
+3 experiment : 615.892ms
+3 experiment : 615.348ms
+4 experiment : 150.981ms
+4 experiment : 145.283ms
+end
+--------------------------
+
+
+Thu May 29 19:18:41 2025
+--------------------------
+warm process experiment : 1715.63ms
+1 experiment : 798.967ms
