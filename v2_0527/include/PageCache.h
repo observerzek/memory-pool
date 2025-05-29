@@ -24,6 +24,8 @@ private:
     // 根据页地址 到 该页对应的 span结点 的映射
     std::map<void*, Span*> address_to_span_;
     std::mutex mutex_;
+    TimeLog log_allocate_;
+    TimeLog log_deallocate_;
 
 public:
     // 函数PageCache前忘记加static
@@ -40,8 +42,19 @@ public:
         return address_to_span_[page_add];
     }
 
+    inline void showDurationTime(){
+        log_allocate_.showDurationTime();
+        log_deallocate_.showDurationTime();
+    }
+
+    inline void resetDurationTime(){
+        log_allocate_.reset();
+        log_deallocate_.reset();
+    }
 private:
-    PageCache() = default;
+    PageCache()
+        : log_allocate_("page cache allocate")
+        , log_deallocate_("page cache deallocate"){};
 
     void getMemoryFromSys();
 
@@ -52,6 +65,8 @@ private:
     void pushSpanToPageList(Span* span, size_t page);
 
     Span* popSpanFromPageList(size_t page);
+
+    void popSpanFromPageList(Span* span, size_t page);
 
 };
 

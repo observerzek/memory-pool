@@ -46,22 +46,22 @@ void* ThreadPool::getMemoryFromCenter(size_t bytes){
     return memory;
 }
 
-void ThreadPool::setListNums(size_t index){
-    void* current_block = free_list_[index];
-    size_t count = getCount(current_block);
-    free_list_nums_[index] = count;
-}
+// void ThreadPool::setListNums(size_t index){
+//     void* current_block = free_list_[index];
+//     size_t count = getCount(current_block);
+//     free_list_nums_[index] = count;
+// }
 
 
-size_t ThreadPool::getCount(void* current){
-    size_t count = 0;
-    void* next = current;
-    while(next){
-        count ++;
-        next = getNextBlock(next);
-    }
-    return count;
-}
+// size_t ThreadPool::getCount(void* current){
+//     size_t count = 0;
+//     void* next = current;
+//     while(next){
+//         count ++;
+//         next = getNextBlock(next);
+//     }
+//     return count;
+// }
 
 
 void ThreadPool::deallocate(void* ptr, size_t bytes){
@@ -70,10 +70,14 @@ void ThreadPool::deallocate(void* ptr, size_t bytes){
     if(bytes > MAX_BYTES) operator delete(ptr);
 
     size_t index = SizeClass::getIndex(bytes);
-    void* next = getNextBlock(ptr);
-    next = free_list_[index];
+    setBlockNextPointer(ptr, free_list_[index]);
+    // void* next = getNextBlock(ptr);
+    // if(next){
+    //     setBlockNextPointer(next, free_list_[index]);
+    // }
+    // next = free_list_[index];
     free_list_[index] = ptr;
-    free_list_nums_[index] += getCount(ptr);
+    free_list_nums_[index]++;
     if(shouldReturn(bytes)){
         returnMemoryToCenter(bytes);
     }
@@ -98,9 +102,21 @@ void ThreadPool::returnMemoryToCenter(size_t bytes){
     free_list_nums_[index] = count + 1;
 }
 
-// ThreadPool::~ThreadPool(){
-//     std::cout << "end" << std::endl;
-// }
+
+void ThreadPool::returnAllMemoryTocenter(void* memory_list, size_t bytes){
+    CenterCache::getInstance().deallocate(memory_list, bytes);
+}
+
+ThreadPool::~ThreadPool() {
+    for(size_t i = 0; i < FREE_LIST_SIZE; ++i){
+        // std::cout << "end 1 " << std::endl;
+        void* block = free_list_[i];
+        if(block){
+            returnAllMemoryTocenter(block, (i + 1) * ALIGNMENT);
+        }
+    }
+    // std::cout << "end" << std::endl;
+}
 
 
 } // namespace MemoryPool

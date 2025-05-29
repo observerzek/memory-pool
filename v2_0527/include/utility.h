@@ -1,7 +1,7 @@
 #pragma once
 // #include <cstddef>
 #include <iostream>
-
+#include <chrono>
 
 namespace MemoryPool
 {
@@ -35,6 +35,45 @@ public:
     }
 
 
+
+};
+
+class TimeLog{
+
+private:
+    std::chrono::time_point<std::chrono::high_resolution_clock> check_point_;
+    double duration_time_;  
+    std::string name_;
+    size_t count_;
+    
+public:
+    TimeLog(const std::string & name)
+        : name_(name)
+        , count_(0){
+        // check_point_ = std::chrono::high_resolution_clock::now();
+        duration_time_ = 0;
+    }
+
+    void reset(){
+        duration_time_ = 0.0;
+        count_ = 0;
+    }
+
+    void begin(){
+        check_point_ = std::chrono::high_resolution_clock::now();
+        count_++;
+    }
+
+    void end(){
+        std::chrono::time_point<std::chrono::high_resolution_clock> now;
+        now = std::chrono::high_resolution_clock::now();
+        duration_time_ += std::chrono::duration_cast<std::chrono::microseconds>(now - check_point_).count();
+    }
+
+    void showDurationTime(){
+        std::cout << name_ << " : " << duration_time_ / 1000.0 << "ms, count time : " 
+                   << count_ << std::endl;
+    }
 
 };
 

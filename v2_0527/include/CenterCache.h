@@ -10,6 +10,8 @@ class CenterCache{
 private:
     std::array<std::atomic<Span*>, FREE_LIST_SIZE> center_list_;
     std::array<std::atomic_flag, FREE_LIST_SIZE> center_list_lock_;
+    TimeLog log_allocate_;
+    TimeLog log_deallocate_;
 
 public:
     // 在这里我返回的是指针
@@ -29,8 +31,20 @@ public:
 
     void deallocate(void* memory_list, size_t bytes);
 
+    inline void showDurationTime(){
+        log_allocate_.showDurationTime();
+        log_deallocate_.showDurationTime();
+    }
+
+    inline void resetDurationTime(){
+        log_allocate_.reset();
+        log_deallocate_.reset();
+    }
+
 private:
-    CenterCache(){
+    CenterCache()
+        : log_allocate_("center cache allocate")
+        , log_deallocate_("center cache deallocate"){
         for(auto &i : center_list_){
             i.store(nullptr, std::memory_order_relaxed);
         }
@@ -52,6 +66,8 @@ private:
     void  returnMemoryToPage(Span* span, size_t bytes);
 
     inline bool shouldReturn(Span* (&span));
+
+
 };
 
 

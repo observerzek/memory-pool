@@ -19,6 +19,7 @@ void* CenterCache::allocate(size_t bytes, size_t nums){
         std::this_thread::yield();
     }
 
+    log_allocate_.begin();
     Span* now_span = center_list_[index].load(std::memory_order_relaxed);
     // memory_list_head
     // 为返回block list的头指针
@@ -70,6 +71,7 @@ void* CenterCache::allocate(size_t bytes, size_t nums){
             // center_list_[index].store(new_span, std::memory_order_relaxed);
         }
     }  
+    log_allocate_.end();
     center_list_lock_[index].clear(std::memory_order_release);
     
     
@@ -101,7 +103,6 @@ Span* CenterCache::getMemoryFromPage(size_t bytes){
     int count = 0;
     while(current_block_next < page_add_end){
         block_nums++;
-        std::cout << ++count << std::endl;
         setBlockNextPointer(current_block, current_block_next);
         current_block = current_block_next;
         current_block_next = reinterpret_cast<char*>(current_block) + bytes;
@@ -135,7 +136,7 @@ void CenterCache::deallocate(void* memory_list, size_t bytes){
         std::this_thread::yield();
     }
 
-
+    log_deallocate_.begin();
     void* current_block = memory_list;
     void* current_block_next = getNextBlock(current_block);
     void* page_add = nullptr;
@@ -145,7 +146,7 @@ void CenterCache::deallocate(void* memory_list, size_t bytes){
         Span* span = PageCache::getInstance().getPageSpan(page_add);
 
         // 头插法
-        // 插入到span 的空间block_list里
+        // 插入到span 的空闲block_list里
         setBlockNextPointer(current_block, span->block_list);
         span->block_list = current_block;
 
@@ -160,6 +161,7 @@ void CenterCache::deallocate(void* memory_list, size_t bytes){
         }
     }
 
+    log_deallocate_.end();
     center_list_lock_[index].clear(std::memory_order_release);
 
 }
@@ -171,8 +173,15 @@ inline bool CenterCache::shouldReturn(Span* (&span)){
 
 void CenterCache::returnMemoryToPage(Span* span, size_t bytes){
     // 断开 span 在 center_list_[index] 队列的连接
-    span->next->pre = span->pre;
-    span->pre->next = span->next;
+    // 不做指针判断 就会出现 segment fault !!
+    if(span->next){
+        span->next->pre = span->pre;
+    }
+    // 不做指针判断 就会出现 segment fault !!
+    if(span->pre){
+        span->pre->next = span->next;
+    }
+
     if(center_list_[SizeClass::getIndex(bytes)] == span){
         center_list_[SizeClass::getIndex(bytes)].store(span->next, std::memory_order_relaxed);
     }

@@ -1,5 +1,7 @@
 #pragma once
 #include "ThreadCache.h"
+#include "CenterCache.h"
+#include "PageCache.h"
 
 
 
